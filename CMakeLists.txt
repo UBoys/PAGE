@@ -1,4 +1,4 @@
-project(MoltenCore)
+project(PAGE)
 cmake_minimum_required(VERSION 3.12)
 
 # Compilation flags
