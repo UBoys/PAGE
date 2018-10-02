@@ -1,19 +1,19 @@
 #include <iostream>
 #include "../core/engine.h"
-#include "../renderer/renderer.h"
-#include "../display/glfw/displayglfw.h"
 
 int main() {
 	static_assert("C++17");
 	std::cout << "Hello kewken\n";
 
-	Engine e;
-	Renderer r;
-	std::unique_ptr<IDisplay> display = std::make_unique<DisplayGlfw>();
+	// Initialize
+	page::InitData data;
+	data.width = 1080u;
+	data.height = 720u;
+	data.title = "PAGE test";
+	data.fullScreen = false;
 
-	while (true) {
-		display->update();
-	}
+	page::Engine engine(std::move(data));
+	engine.Run();
 
 	std::cin.get();
 }

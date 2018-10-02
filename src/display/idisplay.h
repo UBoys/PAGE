@@ -2,5 +2,7 @@
 
 class IDisplay {
 public:
-    virtual void update() = 0;
+    virtual ~IDisplay() = default;
+
+    virtual void Update() const = 0;
 };

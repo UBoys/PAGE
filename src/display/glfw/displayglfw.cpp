@@ -7,8 +7,11 @@ namespace {
     void _callbackError(int error, const char *description) { } // TODO: Implement
 }
 
-DisplayGlfw::DisplayGlfw() : m_width(1080), m_height(720), m_title("PAGE"), m_fullscreen(false) {
-    _initialize();
+DisplayGlfw::DisplayGlfw(const uint16_t width, const uint16_t height, const std::string title,
+                         const bool fullscreen)
+    : m_width(width), m_height(height), m_title(title), m_fullscreen(fullscreen)
+{
+    _Initialize();
 }
 
 DisplayGlfw::~DisplayGlfw() {
@@ -17,7 +20,7 @@ DisplayGlfw::~DisplayGlfw() {
     glfwTerminate();
 }
 
-void DisplayGlfw::_initialize() {
+void DisplayGlfw::_Initialize() {
     glfwSetErrorCallback(_callbackError);
 
     if (!glfwInit()) {
@@ -44,6 +47,6 @@ void DisplayGlfw::_initialize() {
     glfwShowWindow(m_window);
 }
 
-void DisplayGlfw::update() {
+void DisplayGlfw::Update() const {
     glfwPollEvents();
 }

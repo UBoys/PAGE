@@ -5,16 +5,17 @@
 
 struct GLFWwindow;
 
-class DisplayGlfw : public IDisplay {
+class DisplayGlfw final : public IDisplay {
 public:
-	DisplayGlfw();
-	~DisplayGlfw();
+	DisplayGlfw(const uint16_t width, const uint16_t height, const std::string title,
+				const bool fullscreen);
+	virtual ~DisplayGlfw() final;
 
-	virtual void update() override;
+	virtual void Update() const final;
 private:
-    void _initialize();
+	void _Initialize();
 
-    bool m_fullscreen;
+	bool m_fullscreen;
 	GLFWwindow* m_window;
 	std::string m_title;
 	uint16_t m_width;
