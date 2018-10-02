@@ -1,0 +1,49 @@
+#include "displayglfw.h"
+
+#include <GLFW/glfw3.h>
+#include <iostream>
+
+namespace {
+    void _callbackError(int error, const char *description) { } // TODO: Implement
+}
+
+DisplayGlfw::DisplayGlfw() : m_width(1080), m_height(720), m_title("PAGE"), m_fullscreen(false) {
+    _initialize();
+}
+
+DisplayGlfw::~DisplayGlfw() {
+    // Free the window callbacks and destroy the window.
+    glfwDestroyWindow(m_window);
+    glfwTerminate();
+}
+
+void DisplayGlfw::_initialize() {
+    glfwSetErrorCallback(_callbackError);
+
+    if (!glfwInit()) {
+        fprintf(stderr, "GLFW error: Failed to initialize!\n");
+    }
+
+    // Configures the window.
+    glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);  // The window will stay hidden until after creation
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // The window will be resizable if not fullscreen
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // Disable context creation
+
+    // For new GLFW, and macOS.
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);	// Fixes 16 bit stencil bits in macOS.
+    glfwWindowHint(GLFW_STEREO, GLFW_FALSE); // No stereo view!
+
+    // Create a windowed mode window with no context
+    m_window = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+    if (m_window == nullptr) {
+        // TODO: Handle error
+        glfwTerminate();
+    }
+
+    // Shows the glfw window.
+    glfwShowWindow(m_window);
+}
+
+void DisplayGlfw::update() {
+    glfwPollEvents();
+}
