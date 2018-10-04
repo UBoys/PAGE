@@ -7,8 +7,7 @@ struct GLFWwindow;
 
 class DisplayGlfw final : public IDisplay {
 public:
-	DisplayGlfw(const uint16_t width, const uint16_t height, const std::string title,
-				const bool fullscreen);
+	DisplayGlfw(const uint16_t width, const uint16_t height, const std::string title, const bool fullscreen);
 	virtual ~DisplayGlfw() final;
 
 	virtual void Update() const final;
