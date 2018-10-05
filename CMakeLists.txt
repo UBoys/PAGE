@@ -1,5 +1,6 @@
-project(PAGE)
 cmake_minimum_required(VERSION 3.9.2)
+project(PAGE)
+message("Creating project PAGE")
 
 # Compilation flags
 if(MSVC)
@@ -10,7 +11,7 @@ else(MSVC)
 endif(MSVC)
 
 file(GLOB_RECURSE PROJECT_CORE src/core/*.cpp src/core/*.h)
-file(GLOB_RECURSE PROJECT_RENDERER src/renderer/*.cpp src/renderer/*.h)
+file(GLOB_RECURSE PROJECT_RENDERER src/renderer/*.cpp src/renderer/*.h src/renderer/*.inl)
 file(GLOB_RECURSE PROJECT_EXAMPLES src/examples/*.cpp src/examples/*.h)
 
 # IDE groups
@@ -24,3 +25,13 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 add_executable(${PROJECT_NAME} ${PROJECT_CORE} ${PROJECT_RENDERER} ${PROJECT_EXAMPLES})
 
 include_directories(src/)
+
+# Include link_libraries
+option(PAGE_GLFW_ENABLED "Should we use GLFW? (TODO: Implement this.. just added for grouping in CMAKE UI atm ;)" ON)
+
+option(PAGE_VULKAN_ENABLED "Should we use the vulkan API?")
+if (PAGE_VULKAN_ENABLED)
+
+	add_compile_definitions(VK_NO_PROTOTYPES)
+
+endif (PAGE_VULKAN_ENABLED)

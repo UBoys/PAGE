@@ -11,6 +11,16 @@ TempVulkanSetupObject::TempVulkanSetupObject()
 
 bool TempVulkanSetupObject::init()
 {
+#ifdef VK_NO_PROTOTYPES
+    std::cout << "\tVK_NO_PROTOTYPES is defined\n";
+#else
+    std::cout << "\tWARNING: VK_NO_PROTOTYPES is NOT defined. This may become a potential performance issue.\n";
+#endif
+    return initLibs();
+}
+
+bool TempVulkanSetupObject::initLibs()
+{
 #if defined _WIN32
     vulkan_library = LoadLibrary("vulkan-1.dll");
 #elif defined __linux

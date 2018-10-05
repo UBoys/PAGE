@@ -13,6 +13,7 @@ public:
     bool isValid() { return m_isValid; }
 private:
     bool init();
+    bool initLibs();
 private:
     bool m_isValid;
 #if defined _WIN32
