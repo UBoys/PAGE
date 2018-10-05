@@ -8,6 +8,8 @@ addons:
       - ubuntu-toolchain-r-test
     packages:
       - g++-6
+      - libglu1-mesa-dev
+      - xorg-dev
 
 script:
   - CXX=/usr/bin/g++-6 CC=/usr/bin/gcc-6 cmake .
