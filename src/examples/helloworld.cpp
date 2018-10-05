@@ -14,5 +14,10 @@ int main() {
 
     vulkan::TempVulkanSetupObject vulkanInitObj;
 
+    std::cout << (vulkanInitObj.isValid() ?
+        "Vulkan was successfully initialized\n" :
+        "ERROR: Vulkan initialization failed\n");
+
+    std::cout << "\n\nPress enter to EXIT";
 	std::cin.get();
 }

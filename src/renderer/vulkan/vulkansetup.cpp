@@ -1,7 +1,10 @@
-#include "vulkansetup.h"
 #include <iostream>
+#include "vulkansetup.h"
+#include "vulkanfunctions.h"
 
 namespace page::vulkan {
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TempVulkanSetupObject::TempVulkanSetupObject()
 {
@@ -9,15 +12,17 @@ TempVulkanSetupObject::TempVulkanSetupObject()
     m_isValid = init();
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 bool TempVulkanSetupObject::init()
 {
-#ifdef VK_NO_PROTOTYPES
-    std::cout << "\tVK_NO_PROTOTYPES is defined\n";
-#else
-    std::cout << "\tWARNING: VK_NO_PROTOTYPES is NOT defined. This may become a potential performance issue.\n";
-#endif
-    return initLibs();
+    if (!initLibs() || !initProcAddr())
+        return false;
+
+    return true;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool TempVulkanSetupObject::initLibs()
 {
@@ -29,13 +34,44 @@ bool TempVulkanSetupObject::initLibs()
     std::cerr << "The PAGE renderer is not yet setup for Vulkan on this platform. Supported operating systems are Linux and Windows" << std::endl;
     vulkan_library = nullptr;
 #endif
-    if (vulkan_library) {
-        std::cout << "\tSuccessfully connected with a Vulkan Runtime library.\n";
-        return true;
+    if (!vulkan_library) {
+        std::cerr << "Could not connect with a Vulkan Runtime library.\n";
+        return false;
     }
 
-    std::cerr << "Could not connect with a Vulkan Runtime library.\n";
-    return false;
+    std::cout << "\tSuccessfully connected with a Vulkan Runtime library.\n";
+    return true;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::initProcAddr()
+{
+#ifdef VK_NO_PROTOTYPES
+    std::cout << "\tVK_NO_PROTOTYPES is defined\n";
+#else
+    std::cout << "\tWARNING: VK_NO_PROTOTYPES is NOT defined. This may become a potential performance issue.\n";
+#endif
+
+#if defined _WIN32
+#define LoadFunction GetProcAddress
+#elif defined __linux
+#define LoadFunction dlsym
+#endif
+
+#define EXPORTED_VULKAN_FUNCTION( name )                              \
+    name = (PFN_##name)LoadFunction( vulkan_library, #name );         \
+    if( name == nullptr ) {                                           \
+      std::cout << "Could not load exported Vulkan function named: "  \
+        #name << std::endl;                                           \
+      return false;                                                   \
+    }
+
+#include "ListOfVulkanFunctions.inl"
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace page::vulkan

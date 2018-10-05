@@ -11,9 +11,12 @@ class TempVulkanSetupObject {
 public:
     TempVulkanSetupObject();
     bool isValid() { return m_isValid; }
+
 private:
     bool init();
     bool initLibs();
+    bool initProcAddr();
+
 private:
     bool m_isValid;
 #if defined _WIN32
