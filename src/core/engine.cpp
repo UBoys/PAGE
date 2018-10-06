@@ -3,6 +3,8 @@
 
 #include "../display/glfw/displayglfw.h"
 
+#include "../renderer/irenderer.h"
+
 namespace page {
 
 Engine::Engine(const InitData data) {
