@@ -16,6 +16,7 @@ private:
     bool init();
     bool initLibs();
     bool initProcAddr();
+    bool loadGlobalLevelFunctions();
 
 private:
     bool m_isValid;

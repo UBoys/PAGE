@@ -1,5 +1,6 @@
-#include <iostream>
 #include "vulkansetup.h"
+
+#include <iostream>
 #include "vulkanfunctions.h"
 
 namespace page::vulkan {
@@ -16,7 +17,7 @@ TempVulkanSetupObject::TempVulkanSetupObject()
 
 bool TempVulkanSetupObject::init()
 {
-    if (!initLibs() || !initProcAddr())
+    if (!initLibs() || !initProcAddr() || !loadGlobalLevelFunctions())
         return false;
 
     return true;
@@ -65,6 +66,23 @@ bool TempVulkanSetupObject::initProcAddr()
         std::cout << "Could not load exported Vulkan function named: "\
             #name << std::endl;                                       \
         return false;                                                 \
+    }
+
+#include "listofvulkanfunctions.inl"
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::loadGlobalLevelFunctions()
+{
+#define GLOBAL_LEVEL_VULKAN_FUNCTION( name )                        \
+    name = (PFN_##name)vkGetInstanceProcAddr( nullptr, #name );     \
+    if( name == nullptr ) {                                         \
+        std::cout << "Could not load global-level function named: " \
+            #name << std::endl;                                     \
+        return false;                                               \
     }
 
 #include "listofvulkanfunctions.inl"
