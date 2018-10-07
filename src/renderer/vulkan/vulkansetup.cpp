@@ -117,7 +117,7 @@ bool TempVulkanSetupObject::setupLogicalDevice()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TempVulkanSetupObject::printAvailableExtensions()
+void TempVulkanSetupObject::printAvailableExtensions() const
 {
     std::vector<VkExtensionProperties> availableExtensions;
     availableExtensions.resize(m_extensionCount);
