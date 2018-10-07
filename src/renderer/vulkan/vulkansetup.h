@@ -14,6 +14,7 @@ public:
     TempVulkanSetupObject();
     bool isValid() const { return m_isValid; }
     uint32_t extensionCount() const { return m_extensionCount; }
+    void printAvailableExtensions();
 
 private:
     bool init();

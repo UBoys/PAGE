@@ -1,6 +1,7 @@
 #include "vulkansetup.h"
 
 #include <iostream>
+#include <vector>
 #include "vulkanfunctions.h"
 
 namespace page::vulkan {
@@ -102,8 +103,40 @@ bool TempVulkanSetupObject::setupLogicalDevice()
         return false;
     }
 
+    std::vector<VkExtensionProperties> availableExtensions;
+    availableExtensions.resize(m_extensionCount);
+    result = vkEnumerateInstanceExtensionProperties(nullptr,
+        &m_extensionCount, &availableExtensions[0]);
+    if ((result != VK_SUCCESS) ||
+        (m_extensionCount == 0)) {
+        std::cout << "Could not enumerate Instance extensions." << std::endl;
+        return false;
+    }
     return true;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void TempVulkanSetupObject::printAvailableExtensions()
+{
+    std::vector<VkExtensionProperties> availableExtensions;
+    availableExtensions.resize(m_extensionCount);
+    VkResult result = vkEnumerateInstanceExtensionProperties(nullptr, &m_extensionCount, &availableExtensions[0]);
+    if ((result != VK_SUCCESS) ||
+        (m_extensionCount == 0)) {
+        std::cout << "Could not enumerate Instance extensions." << std::endl;
+        return;
+    }
+
+    std::cout << "The following extensions are available:\n";
+
+    for (auto & extension : availableExtensions) {
+        std::cout << "\t" << extension.extensionName << "\n";
+    }
+    std::cout << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 

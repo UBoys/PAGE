@@ -16,7 +16,8 @@ int main() {
 
     if (vulkanInitObj.isValid()) {
         std::cout << "Vulkan was successfully initialized\n\tThere are "
-            << vulkanInitObj.extensionCount() << " valid extensions.\n";
+            << vulkanInitObj.extensionCount() << " valid extensions.\n\n";
+        vulkanInitObj.printAvailableExtensions();
     } else {
         std::cout << "ERROR: Vulkan initialization failed\n";
     }
