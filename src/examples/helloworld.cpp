@@ -14,9 +14,12 @@ int main() {
 
     vulkan::TempVulkanSetupObject vulkanInitObj;
 
-    std::cout << (vulkanInitObj.isValid() ?
-        "Vulkan was successfully initialized\n" :
-        "ERROR: Vulkan initialization failed\n");
+    if (vulkanInitObj.isValid()) {
+        std::cout << "Vulkan was successfully initialized\n\tThere are "
+            << vulkanInitObj.extensionCount() << " valid extensions.\n";
+    } else {
+        std::cout << "ERROR: Vulkan initialization failed\n";
+    }
 
     std::cout << "\n\nPress enter to EXIT";
 	std::cin.get();

@@ -8,6 +8,7 @@ namespace page::vulkan {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TempVulkanSetupObject::TempVulkanSetupObject()
+: m_extensionCount(0)
 {
     std::cout << "I am a temporary Vulkan Setup object\n";
     m_isValid = init();
@@ -17,7 +18,7 @@ TempVulkanSetupObject::TempVulkanSetupObject()
 
 bool TempVulkanSetupObject::init()
 {
-    if (!initLibs() || !initProcAddr() || !loadGlobalLevelFunctions())
+    if (!initLibs() || !initProcAddr() || !loadGlobalLevelFunctions() || !setupLogicalDevice())
         return false;
 
     return true;
@@ -86,6 +87,20 @@ bool TempVulkanSetupObject::loadGlobalLevelFunctions()
     }
 
 #include "listofvulkanfunctions.inl"
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::setupLogicalDevice()
+{
+    VkResult result = VK_SUCCESS;
+    result = vkEnumerateInstanceExtensionProperties(nullptr, &m_extensionCount, nullptr);
+    if (result != VK_SUCCESS || m_extensionCount == 0) {
+        std::cout << "Could not get the number of Instance extensions." << std::endl;
+        return false;
+    }
 
     return true;
 }
