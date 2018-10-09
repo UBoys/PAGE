@@ -2,7 +2,7 @@
 
 #include <vector>
 
-namespace pgfx {
+namespace dwf {
 
 enum RenderCommand {
     SetPipelineState,
@@ -37,7 +37,7 @@ class IRenderer {
 public:
     virtual ~IRenderer() = default;
 
-    virtual void Initialize(const RendererCaps& caps, const PlatformData& platformData, const InitData& initData) = 0;
+    virtual void Initialize(const RendererCaps& caps, const PlatformData& platformData) = 0;
 
     virtual GfxObject CreateVertexBuffer(const uint32_t count) = 0;
     virtual GfxObject CreateIndexBuffer(const uint32_t count) = 0;

@@ -15,8 +15,8 @@ option(GLFW_BUILD_EXAMPLES OFF)
 option(GLFW_BUILD_TESTS OFF)
 add_subdirectory(ext/glfw)
 
-# PGFX - TODO Move to submodule
-add_subdirectory(src/renderer)
+# DireWolf - TODO Move to submodule
+add_subdirectory(src/direwolf)
 
 file(GLOB_RECURSE PROJECT_DISPLAY src/display/*.cpp src/display/*.h)
 file(GLOB_RECURSE PROJECT_CORE src/core/*.cpp src/core/*.h)
@@ -33,4 +33,4 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT $
 add_executable(${PROJECT_NAME} ${PROJECT_DISPLAY} ${PROJECT_CORE} ${PROJECT_RENDERER} ${PROJECT_EXAMPLES})
 
 include_directories(src/)
-target_link_libraries(${PROJECT_NAME} glfw pgfx)
+target_link_libraries(${PROJECT_NAME} glfw direwolf)

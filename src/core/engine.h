@@ -3,6 +3,9 @@
 #include <memory>
 
 class IDisplay;
+namespace dwf {
+	class RenderEngine;
+}
 
 namespace page {
 
@@ -22,6 +25,7 @@ public:
     void Run() const;
 private:
     std::unique_ptr<IDisplay> m_display;
+	std::unique_ptr<dwf::RenderEngine> m_renderEngine;
 };
 
 } // namespace page

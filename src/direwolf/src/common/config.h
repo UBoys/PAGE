@@ -1,8 +1,8 @@
 #pragma once
 
-namespace pgfx {
+namespace dwf {
 
-enum RendererType {
+enum BackendType {
     Null,
     OpenGL,
     Vulkan,
@@ -10,12 +10,18 @@ enum RendererType {
     D3D12
 };
 
+enum RendererType {
+    Rasterizer,
+    RayTracer
+};
+
 struct PlatformData {
     void* windowHandle = nullptr;
 };
 
 struct InitData {
-    RendererType preferredRenderer = Null;
+    RendererType rendererType;
+    BackendType backendType;
 };
 
 } // namespace pgfx

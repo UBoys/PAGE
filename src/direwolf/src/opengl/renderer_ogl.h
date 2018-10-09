@@ -2,13 +2,13 @@
 
 #include "irenderer.h"
 
-namespace pgfx {
+namespace dwf {
 
 struct PlatformData;
 struct InitData;
 class RendererOGL final : public IRenderer {
 public:
-    virtual void Initialize(const RendererCaps& caps, const PlatformData& data, const InitData& initData) final;
+    virtual void Initialize(const RendererCaps& caps, const PlatformData& data) final;
 
     virtual GfxObject CreateVertexBuffer(const uint32_t count) { return GfxObject(); };
     virtual GfxObject CreateIndexBuffer(const uint32_t count) { return GfxObject(); };
@@ -32,4 +32,4 @@ public:
     virtual void Render(const std::vector<RenderCommand>& commandBuffer){};
 };
 
-}  // namespace pgfx
+}  // namespace dwf
