@@ -6,7 +6,7 @@
 namespace pgfx {
 
 void Initialize(const PlatformData& platformData, const InitData& initData) {
-	std::cout << "PGFX: Initializing render library!\n";
+    std::cout << "PGFX: Initializing render library!\n";
     RendererCaps caps = {};
     switch (initData.preferredRenderer) {
         case RendererType::OpenGL:
@@ -15,7 +15,7 @@ void Initialize(const PlatformData& platformData, const InitData& initData) {
             break;
         case RendererType::Vulkan:
             // TODO: Callbam
-			std::cerr << "No vulkan renderer implemented yet!";
+            std::cerr << "No vulkan renderer implemented yet!";
             break;
         default:
             std::cerr << "What are you doing\n";
