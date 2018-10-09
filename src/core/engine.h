@@ -21,7 +21,7 @@ public:
 
 	void Run() const;
 private:
-	std::unique_ptr<IDisplay> mDisplay;
+	std::unique_ptr<IDisplay> m_display;
 };
 
 } // namespace page

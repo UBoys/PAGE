@@ -10,6 +10,7 @@ public:
 	DisplayGlfw(const uint16_t width, const uint16_t height, const std::string title, const bool fullscreen);
 	virtual ~DisplayGlfw() final;
 
+	inline virtual void* GetNativeWindowHandle() const final { return static_cast<void*>(m_window); }
 	virtual void Update() const final;
 private:
 	void _Initialize();

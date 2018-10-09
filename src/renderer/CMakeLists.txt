@@ -9,9 +9,9 @@ if (PGFX_BUILD_EXAMPLES)
 endif()
 
 if (BUILD_SHARED_LIBS)
-    add_library(pgfx SHARED src/pgfx.cpp)
+    add_library(pgfx SHARED src/pgfx.cpp src/opengl/renderer_ogl.cpp)
 else()
-    add_library(pgfx STATIC src/pgfx.cpp)
+    add_library(pgfx STATIC src/pgfx.cpp src/opengl/renderer_ogl.cpp)
 endif()
 
-target_include_directories(pgfx PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include src)
+target_include_directories(pgfx PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src)
