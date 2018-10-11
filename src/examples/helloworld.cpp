@@ -12,12 +12,13 @@ int main() {
 	Engine e;
 	Renderer r;
 
-    vulkan::TempVulkanSetupObject vulkanInitObj;
+    std::vector<const char*> desiredVulkanExtensions = { "VK_KHR_surface" };
+
+    vulkan::TempVulkanSetupObject vulkanInitObj(&desiredVulkanExtensions);
 
     if (vulkanInitObj.isValid()) {
-        std::cout << "Vulkan was successfully initialized\n\tThere are "
-            << vulkanInitObj.extensionCount() << " valid extensions.\n\n";
-        vulkanInitObj.printAvailableExtensions();
+        std::cout << "Vulkan was successfully initialized\n\n";
+        vulkanInitObj.debugPrintAvailableExtensions();
     } else {
         std::cout << "ERROR: Vulkan initialization failed\n";
     }

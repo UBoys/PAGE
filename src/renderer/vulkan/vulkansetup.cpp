@@ -1,26 +1,37 @@
 #include "vulkansetup.h"
 
+#include <cstring>
 #include <iostream>
-#include <vector>
 #include "vulkanfunctions.h"
 
 namespace page::vulkan {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-TempVulkanSetupObject::TempVulkanSetupObject()
-: m_extensionCount(0)
+TempVulkanSetupObject::TempVulkanSetupObject(std::vector<const char*>* desiredExtensions /* = nullptr */)
+: m_isValid(false)
 {
     std::cout << "I am a temporary Vulkan Setup object\n";
-    m_isValid = init();
+    m_isValid = initialize(desiredExtensions);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool TempVulkanSetupObject::init()
+bool TempVulkanSetupObject::initialize(std::vector<const char*>* desiredExtensions)
 {
-    if (!initLibs() || !initProcAddr() || !loadGlobalLevelFunctions() || !setupLogicalDevice())
+    if (m_isValid) {
+        std::cerr << "Trying to initialize TempVulkanSetupObject after it has already been initialized!" << std::endl;
         return false;
+    }
+
+    // Out as soon as something goes wrong
+    if (!initLibs() ||
+        !initProcAddr() ||
+        !loadGlobalLevelFunctions() ||
+        !createVulkanInstance(desiredExtensions))
+    {
+        return false;
+    }
 
     return true;
 }
@@ -39,10 +50,12 @@ bool TempVulkanSetupObject::initLibs()
 #endif
     if (!vulkan_library) {
         std::cerr << "Could not connect with a Vulkan Runtime library.\n";
+        s_vulkanRTLFound = false;
         return false;
     }
 
     std::cout << "\tSuccessfully connected with a Vulkan Runtime library.\n";
+    s_vulkanRTLFound = true;
     return true;
 }
 
@@ -50,6 +63,7 @@ bool TempVulkanSetupObject::initLibs()
 
 bool TempVulkanSetupObject::initProcAddr()
 {
+    // TODO: move this #ifdef part elsewhere?
 #ifdef VK_NO_PROTOTYPES
     std::cout << "\tVK_NO_PROTOTYPES is defined\n";
 #else
@@ -94,49 +108,138 @@ bool TempVulkanSetupObject::loadGlobalLevelFunctions()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool TempVulkanSetupObject::setupLogicalDevice()
+bool TempVulkanSetupObject::getAvailableInstanceExtensions(std::vector<VkExtensionProperties>& outAvailableExtensions) const
 {
+    if (!s_vulkanRTLFound)
+        return false;
+
+    // Input should be an empty vector
+    outAvailableExtensions.clear();
+
     VkResult result = VK_SUCCESS;
-    result = vkEnumerateInstanceExtensionProperties(nullptr, &m_extensionCount, nullptr);
-    if (result != VK_SUCCESS || m_extensionCount == 0) {
-        std::cout << "Could not get the number of Instance extensions." << std::endl;
+    uint32_t extensionCount = 0;
+
+    // Get number of available extensions
+    result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+
+    if (result != VK_SUCCESS || extensionCount == 0) {
+        std::cerr << "Could not get the number of Instance extensions." << std::endl;
         return false;
     }
 
-    std::vector<VkExtensionProperties> availableExtensions;
-    availableExtensions.resize(m_extensionCount);
-    result = vkEnumerateInstanceExtensionProperties(nullptr,
-        &m_extensionCount, &availableExtensions[0]);
-    if ((result != VK_SUCCESS) ||
-        (m_extensionCount == 0)) {
-        std::cout << "Could not enumerate Instance extensions." << std::endl;
+    outAvailableExtensions.resize(extensionCount);
+    result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, &outAvailableExtensions[0]);
+
+    if (result != VK_SUCCESS || outAvailableExtensions.size() == 0) {
+        std::cerr << "Could not enumerate Instance extensions." << std::endl;
         return false;
     }
+
     return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void TempVulkanSetupObject::printAvailableExtensions() const
+void TempVulkanSetupObject::debugPrintAvailableExtensions() const
 {
     std::vector<VkExtensionProperties> availableExtensions;
-    availableExtensions.resize(m_extensionCount);
-    VkResult result = vkEnumerateInstanceExtensionProperties(nullptr, &m_extensionCount, &availableExtensions[0]);
-    if ((result != VK_SUCCESS) ||
-        (m_extensionCount == 0)) {
-        std::cout << "Could not enumerate Instance extensions." << std::endl;
+
+    if (!getAvailableInstanceExtensions(availableExtensions))
         return;
-    }
 
     std::cout << "The following extensions are available:\n";
 
-    for (auto & extension : availableExtensions) {
+    for (const VkExtensionProperties& extension : availableExtensions) {
         std::cout << "\t" << extension.extensionName << "\n";
     }
     std::cout << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::createVulkanInstance(std::vector<const char*>* desiredExtensions)
+{
+    std::vector<VkExtensionProperties> availableExtensions;
+    if (!getAvailableInstanceExtensions(availableExtensions)) {
+        return false;
+    }
+
+    if (desiredExtensions) {
+        for (const char* extension : *desiredExtensions) {
+            if (!isExtensionSupported(extension, &availableExtensions)) {
+                std::cerr << "Extension named '" << extension << "' is not supported." << std::endl;
+                return false;
+            }
+        }
+    }
+
+    VkApplicationInfo applicationInfo;
+    // The following could be set in an initializer list, but this is clearer for now
+    applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    applicationInfo.pNext = nullptr;
+    applicationInfo.pApplicationName = "NullNameApplication";
+    applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    applicationInfo.pEngineName = "NullNameEngine";
+    applicationInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    applicationInfo.apiVersion = VK_MAKE_VERSION(1, 0, 0);
+
+    VkInstanceCreateInfo instanceCreateInfo;
+    // The following could be set in an initializer list, but this is clearer for now
+    instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    instanceCreateInfo.pNext = nullptr;
+    instanceCreateInfo.flags = 0;
+    instanceCreateInfo.pApplicationInfo = &applicationInfo;
+    instanceCreateInfo.enabledLayerCount = 0;
+    instanceCreateInfo.ppEnabledLayerNames = nullptr;
+    instanceCreateInfo.enabledExtensionCount = desiredExtensions ? desiredExtensions->size() : 0;
+    instanceCreateInfo.ppEnabledExtensionNames = desiredExtensions ? desiredExtensions->data() : nullptr;
+
+    // TODO: make member variable?
+    VkInstance instance;
+    if ( (vkCreateInstance( &instanceCreateInfo, nullptr, &instance ) != VK_SUCCESS) || (instance == VK_NULL_HANDLE) ) {
+        std::cout << "Could not create Vulkan Instance." << std::endl;
+        return false;
+
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+std::vector<const char*> TempVulkanSetupObject::getDefaultInstanceExtensions() {
+    return {
+        "VK_KHR_surface",
+    // "VK_KHR_win32_surface",
+    // "VK_KHR_external_memory_capabilities",
+    // "VK_KHR_external_semaphore_capabilities",
+    // "VK_KHR_external_fence_capabilities",
+    // "VK_KHR_get_physical_device_properties2",
+    // "VK_KHR_get_surface_capabilities2",
+    // "VK_EXT_debug_report",
+    // "VK_EXT_display_surface_counter",
+    // "VK_NV_external_memory_capabilities",
+    // "VK_EXT_debug_utils"
+    };
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::isExtensionSupported(const char* extension, std::vector<VkExtensionProperties>* availableExtensionsPtr /* = nullptr*/) const
+{
+    std::vector<VkExtensionProperties> availableExtensions;
+    if (!availableExtensionsPtr) {
+        getAvailableInstanceExtensions(availableExtensions);
+        availableExtensionsPtr = &availableExtensions;
+    }
+
+    for (VkExtensionProperties availableExtension : *availableExtensionsPtr) {
+        if (strcmp(availableExtension.extensionName, extension) == 0)
+            return true;
+    }
+
+    return false;
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
