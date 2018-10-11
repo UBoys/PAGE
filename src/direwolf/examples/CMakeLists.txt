@@ -1,0 +1,2 @@
+add_executable(helloworld_renderer helloworldrenderer.cpp)
+target_link_libraries(helloworld_renderer direwolf)

@@ -2,15 +2,7 @@
 
 #include <vector>
 
-namespace page::gfx {
-
-enum RendererType {
-    Null,
-    OpenGL,
-    Vulkan,
-    D3D11,
-    D3D12
-};
+namespace dwf {
 
 enum RenderCommand {
     SetPipelineState,
@@ -22,11 +14,12 @@ enum RenderCommand {
 };
 
 struct RendererCaps {
-    RendererType type;
     void* allocator;
     bool debug;
 };
 
+struct PlatformData;
+struct InitData;
 struct TextureDescription {};
 struct SamplerDescription {};
 // Should contain rasterizer state, depth stencil state, blend state and shader
@@ -36,17 +29,15 @@ struct PipelineState {};
 // Handle for each renderer resource.
 // All rendering resources are owned by the renderer and should not be coupled with client code
 struct GfxObject {
-    GfxObject() { objectId = ++s_objectIds;};
     bool IsValid() const { return objectId != 0; }
     uint32_t objectId = 0;
-    static uint32_t s_objectIds;
 };
 
 class IRenderer {
 public:
     virtual ~IRenderer() = default;
 
-    virtual void Initialize(const RendererCaps& caps) = 0;
+    virtual void Initialize(const RendererCaps& caps, const PlatformData& platformData) = 0;
 
     virtual GfxObject CreateVertexBuffer(const uint32_t count) = 0;
     virtual GfxObject CreateIndexBuffer(const uint32_t count) = 0;
@@ -57,7 +48,7 @@ public:
     virtual void* MapVertexBuffer(const GfxObject& handle) = 0;
     virtual void* MapIndexBuffer(const GfxObject& handle) = 0;
     virtual void UnmapVertexBuffer(const GfxObject& handle, const uint32_t count) = 0;
-    virtual void UnmapIndexBuffer(const GfxObject& handle, const uint32_t count) = 0; 
+    virtual void UnmapIndexBuffer(const GfxObject& handle, const uint32_t count) = 0;
 
     virtual void DestroyVertexBuffer(const GfxObject& handle) = 0;
     virtual void DestroyIndexBuffer(const GfxObject& handle) = 0;
