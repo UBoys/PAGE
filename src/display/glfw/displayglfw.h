@@ -8,10 +8,10 @@ struct GLFWwindow;
 class DisplayGlfw final : public IDisplay {
 public:
     DisplayGlfw(const uint16_t width, const uint16_t height, const std::string title, const bool fullscreen);
-    virtual ~DisplayGlfw() final;
+    virtual ~DisplayGlfw() override;
 
-    inline virtual void* GetNativeWindowHandle() const final { return static_cast<void*>(m_window); }
-    virtual void Update() const final;
+    virtual void* GetNativeWindowHandle() const override;
+    virtual void Update() const override;
 private:
     void _Initialize();
 

@@ -3,16 +3,16 @@
 namespace dwf {
 
 enum BackendType {
-    Null,
-    OpenGL,
-    Vulkan,
+    NONE,
+    OPENGL,
+    VULKAN,
     D3D11,
     D3D12
 };
 
 enum RendererType {
-    Rasterizer,
-    RayTracer
+    RASTERIZER,
+    RAYTRACER
 };
 
 struct PlatformData {

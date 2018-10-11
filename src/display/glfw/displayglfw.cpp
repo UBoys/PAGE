@@ -1,10 +1,21 @@
 #include "displayglfw.h"
 
 #include <GLFW/glfw3.h>
+
+#if defined(_WIN32)
+	#define GLFW_EXPOSE_NATIVE_WIN32
+#endif
+#include <GLFW/glfw3native.h>
+
 #include <iostream>
 
 namespace {
-	void _callbackError(int error, const char *description) { } // TODO: Implement
+	void _CallbackError(int error, const char *description) { } // TODO: Implement
+	void* _GetGlfwNativeWindowhandle(GLFWwindow* window) {
+#if defined _WIN32
+		return static_cast<void*>(glfwGetWin32Window(window));
+#endif
+	}
 }
 
 DisplayGlfw::DisplayGlfw(const uint16_t width, const uint16_t height, const std::string title, const bool fullscreen)
@@ -19,8 +30,12 @@ DisplayGlfw::~DisplayGlfw() {
 	glfwTerminate();
 }
 
+void* DisplayGlfw::GetNativeWindowHandle() const {
+	return _GetGlfwNativeWindowhandle(m_window);
+}
+
 void DisplayGlfw::_Initialize() {
-	glfwSetErrorCallback(_callbackError);
+	glfwSetErrorCallback(_CallbackError);
 
 	if (!glfwInit()) {
 		fprintf(stderr, "GLFW error: Failed to initialize!\n");
