@@ -9,6 +9,7 @@ if (DIREWOLF_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+add_definitions(-DGLEW_STATIC)
 add_subdirectory(ext/glew-cmake)
 
 if (BUILD_SHARED_LIBS)
@@ -17,4 +18,12 @@ else()
     add_library(direwolf STATIC src/renderengine.cpp src/opengl/renderer_ogl.cpp)
 endif()
 
-target_include_directories(direwolf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/ext/glew-cmake/include)
+target_include_directories(
+	direwolf
+	PUBLIC
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/src
+	${CMAKE_CURRENT_SOURCE_DIR}/ext/glew-cmake/include
+	${CMAKE_CURRENT_SOURCE_DIR}/ext/glew-cmake/src
+)
+target_link_libraries(direwolf libglew_static)
