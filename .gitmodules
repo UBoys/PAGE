@@ -1,3 +1,6 @@
 [submodule "ext/glfw"]
 	path = ext/glfw
 	url = https://github.com/glfw/glfw
+[submodule "src/direwolf/ext/glew-cmake"]
+	path = src/direwolf/ext/glew-cmake
+	url = https://github.com/Perlmint/glew-cmake.git

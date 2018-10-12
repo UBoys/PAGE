@@ -3,10 +3,13 @@ cmake_minimum_required(VERSION 3.9.2)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(DIREWOLF_BUILD_EXAMPLES OFF)
+option(DIREWOLF_BUILD_OPENGL_RENDERER ON)
 
 if (DIREWOLF_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
+
+add_subdirectory(ext/glew-cmake)
 
 if (BUILD_SHARED_LIBS)
     add_library(direwolf SHARED src/renderengine.cpp src/opengl/renderer_ogl.cpp)
@@ -14,4 +17,4 @@ else()
     add_library(direwolf STATIC src/renderengine.cpp src/opengl/renderer_ogl.cpp)
 endif()
 
-target_include_directories(direwolf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(direwolf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/ext/glew-cmake/include)
