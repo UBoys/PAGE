@@ -13,9 +13,9 @@ add_definitions(-DGLEW_STATIC)
 add_subdirectory(ext/glew-cmake)
 
 if (BUILD_SHARED_LIBS)
-    add_library(direwolf SHARED src/renderengine.cpp src/opengl/renderer_ogl.cpp)
+    add_library(direwolf SHARED src/renderengine.cpp src/opengl/renderer_ogl.cpp src/opengl/rendercontext_wgl.cpp)
 else()
-    add_library(direwolf STATIC src/renderengine.cpp src/opengl/renderer_ogl.cpp)
+    add_library(direwolf STATIC src/renderengine.cpp src/opengl/renderer_ogl.cpp src/opengl/rendercontext_wgl.cpp)
 endif()
 
 target_include_directories(

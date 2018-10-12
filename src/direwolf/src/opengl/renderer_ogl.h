@@ -1,13 +1,20 @@
 #pragma once
 
 #include "irenderer.h"
+#include <memory>
 
 namespace dwf {
 
 struct PlatformData;
 struct InitData;
+
+class RenderContextWGL;
+
 class RendererOGL final : public IRenderer {
 public:
+	RendererOGL();
+	virtual ~RendererOGL() override;
+
     virtual void Initialize(const RendererCaps& caps, const PlatformData& data) override;
 
     virtual GfxObject CreateVertexBuffer(const uint32_t count) override { return GfxObject(); }
@@ -30,6 +37,9 @@ public:
 
     // Actual rendering commands that operate on updated and ready resources.
     virtual void Render(const std::vector<RenderCommand>& commandBuffer){};
+
+private:
+	std::unique_ptr<RenderContextWGL> m_renderContext;
 };
 
 }  // namespace dwf
