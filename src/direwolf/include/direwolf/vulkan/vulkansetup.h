@@ -5,7 +5,7 @@
 
 #if defined _WIN32
 #include <windows.h>
-#endif _WIN32
+#endif // _WIN32
 
 struct VkExtensionProperties;
 
@@ -14,6 +14,7 @@ namespace vulkan {
 
 class TempVulkanSetupObject {
 public:
+    // TODO: add struct to hold initialize data.. e.g. desiredExtensions and names etc. See createVulkanInstance implementation to get an idea of what it should hold
     TempVulkanSetupObject(std::vector<const char*>* desiredExtensions = nullptr);
     bool initialize(std::vector<const char*>* desiredExtensions);
     bool isValid() const { return m_isValid; }

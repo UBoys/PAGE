@@ -1,13 +1,14 @@
-#include "vulkansetup.h"
+#include "direwolf/vulkan/vulkansetup.h"
 
 #include <cstring>
 #include <iostream>
-#include "vulkanfunctions.h"
+#include "vulkan/vulkanfunctions.h"
 
 namespace page::vulkan {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// TODO: should probably take some init-struct
 TempVulkanSetupObject::TempVulkanSetupObject(std::vector<const char*>* desiredExtensions /* = nullptr */)
 : m_isValid(false)
 {
@@ -69,6 +70,7 @@ bool TempVulkanSetupObject::initProcAddr()
 #else
     std::cout << "\tWARNING: VK_NO_PROTOTYPES is NOT defined. This may become a potential performance issue.\n";
 #endif
+
 
 #if defined _WIN32
 #define LoadFunction GetProcAddress

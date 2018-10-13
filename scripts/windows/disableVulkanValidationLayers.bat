@@ -1,0 +1,1 @@
+REG delete HKCU\Environment /F /V VK_INSTANCE_LAYERS
