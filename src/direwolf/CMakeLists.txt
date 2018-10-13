@@ -12,10 +12,17 @@ endif()
 add_definitions(-DGLEW_STATIC)
 add_subdirectory(ext/glew-cmake)
 
+set(SOURCE_FILES 
+	src/renderengine.cpp 
+	src/opengl/renderer_ogl.cpp 
+	src/opengl/platform/rendercontext_win.cpp
+	src/opengl/platform/rendercontext_osx.cpp
+)
+
 if (BUILD_SHARED_LIBS)
-    add_library(direwolf SHARED src/renderengine.cpp src/opengl/renderer_ogl.cpp src/opengl/rendercontext_wgl.cpp)
+	add_library(direwolf SHARED ${SOURCE_FILES})
 else()
-    add_library(direwolf STATIC src/renderengine.cpp src/opengl/renderer_ogl.cpp src/opengl/rendercontext_wgl.cpp)
+    add_library(direwolf STATIC ${SOURCE_FILES})
 endif()
 
 target_include_directories(

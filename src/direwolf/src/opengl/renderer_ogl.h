@@ -1,14 +1,14 @@
 #pragma once
 
-#include "irenderer.h"
 #include <memory>
+#include "irenderer.h"
 
 namespace dwf {
 
 struct PlatformData;
 struct InitData;
 
-class RenderContextWGL;
+class IRenderContext;
 
 class RendererOGL final : public IRenderer {
 public:
@@ -39,7 +39,7 @@ public:
     virtual void Render(const std::vector<RenderCommand>& commandBuffer){};
 
 private:
-	std::unique_ptr<RenderContextWGL> m_renderContext;
+	std::unique_ptr<IRenderContext> m_renderContext;
 };
 
 }  // namespace dwf

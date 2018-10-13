@@ -1,16 +1,15 @@
 #pragma once
 
-#include "irenderer.h"
+#include "irendercontext.h"
 #include <windows.h>
 
 namespace dwf {
 
 struct PlatformData;
 
-class RenderContextWGL {
+class RenderContextWGL final : public IRenderContext {
 public:
 	RenderContextWGL(const PlatformData& platformData);
-
 private:
 	void _SetupFakeContext();
 	void _SetupRealContext(const PlatformData& platformData);
