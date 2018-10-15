@@ -16,7 +16,7 @@ set(SOURCE_FILES
 	src/renderengine.cpp 
 	src/opengl/renderer_ogl.cpp 
 	src/opengl/platform/rendercontext_win.cpp
-	src/opengl/platform/rendercontext_osx.cpp
+	src/opengl/platform/rendercontext_osx.mm
 )
 
 if (BUILD_SHARED_LIBS)
