@@ -1,23 +1,31 @@
-#ifdef _WIN32
+#if defined(_WIN32)
 
-#include "rendercontext_wgl.h"
+#include "rendercontext_win.h"
 
 #include <GL/glew.h>
 #include <GL/wglew.h>
 #include <iostream>
+
 #include "common/config.h"
+#include "common/logger.h"
+
+namespace {
+	PIXELFORMATDESCRIPTOR m_pixelFormat;
+	HGLRC m_renderContext;
+	HDC m_deviceContext;
+	HWND m_hwnd;
+}  // namespace
 
 namespace dwf {
 
-RenderContextWGL::RenderContextWGL(const PlatformData& platformData) {
-    _SetupFakeContext();
-    _SetupRealContext(platformData);
-}
-
-void RenderContextWGL::_SetupFakeContext() {
+RenderContextWin::RenderContextWin(const PlatformData& platformData) {
     int errorCode;
     HWND hwndFake = CreateWindowA("STATIC", "", WS_POPUP | WS_DISABLED, -32000, -32000, 0,
                                   0, NULL, NULL, GetModuleHandle(NULL), 0);
+
+	DEBUG_LOG(Logger::INFO, "Setting up render context for windows");
+	DEBUG_LOG(Logger::INFO, "Setting up render context for windows2");
+	Logger::Stop();
 
     // Initialize extensions
     // Get the device context
@@ -53,10 +61,7 @@ void RenderContextWGL::_SetupFakeContext() {
 
     // Release device context
     ReleaseDC(hwndFake, m_deviceContext);
-}
 
-void RenderContextWGL::_SetupRealContext(const PlatformData& platformData) {
-    uint32_t errorCode;
     // Get the device context again
     m_hwnd = static_cast<HWND>(platformData.windowHandle);
     m_deviceContext = GetDC(m_hwnd);
@@ -118,7 +123,7 @@ void RenderContextWGL::_SetupRealContext(const PlatformData& platformData) {
 
     // Get the name of the video card.
     const char* vendorString = (char*)glGetString(GL_VENDOR);
-	const char* versionString = (char*)glGetString(GL_VERSION);
+    const char* versionString = (char*)glGetString(GL_VERSION);
 
     // Turn on or off the vertical sync depending on the input bool value.
     if (true) {
@@ -127,8 +132,9 @@ void RenderContextWGL::_SetupRealContext(const PlatformData& platformData) {
         wglSwapIntervalEXT(0);
     }
 
-	std::cout << "DireWolf: Successfully set up OpenGL context with GPU " << vendorString << std::endl;
-	std::cout << "DireWolf: Running OpenGL version " << versionString << std::endl;
+    std::cout << "DireWolf: Successfully set up OpenGL context with GPU " << vendorString
+              << std::endl;
+    std::cout << "DireWolf: Running OpenGL version " << versionString << std::endl;
 }
 
 }  // namespace dwf

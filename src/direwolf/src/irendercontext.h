@@ -5,7 +5,7 @@ namespace dwf {
 class IRenderContext {
 public:
     virtual ~IRenderContext() = default;
-    virtual void CreateContext() = 0;
+    virtual void SwapBuffers() const = 0;
 };
 
 }

@@ -12,9 +12,10 @@ endif()
 add_definitions(-DGLEW_STATIC)
 add_subdirectory(ext/glew-cmake)
 
-set(SOURCE_FILES 
-	src/renderengine.cpp 
-	src/opengl/renderer_ogl.cpp 
+set(SOURCE_FILES
+	src/renderengine.cpp
+	src/common/logger.cpp
+	src/opengl/renderer_ogl.cpp
 	src/opengl/platform/rendercontext_win.cpp
 	src/opengl/platform/rendercontext_osx.mm
 )

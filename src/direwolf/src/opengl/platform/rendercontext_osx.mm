@@ -92,7 +92,7 @@ RenderContextOSX::~RenderContextOSX() {
     m_context = nullptr;
 }
 
-void RenderContextOSX::Swap() const {
+void RenderContextOSX::SwapBuffers() const {
     NSOpenGLContext* glContext = static_cast<NSOpenGLContext*>(m_context);
     [glContext makeCurrentContext];
 	[glContext flushBuffer];
