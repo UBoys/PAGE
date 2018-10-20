@@ -36,6 +36,13 @@ endif (DIREWOLF_OPENGL_ENABLED)
 if (DIREWOLF_VULKAN_ENABLED)
   message("Including Vulkan")
 
+  find_package(Vulkan REQUIRED)
+  if (Vulkan_FOUND)
+    message("Found Vulkan")
+  endif (Vulkan_FOUND)
+
+  target_include_directories(direwolf PRIVATE ${Vulkan_INCLUDE_DIR})
+
   target_sources(direwolf
     PRIVATE
       # TODO: this should be here src/vulkan/vulkansetup.h

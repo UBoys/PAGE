@@ -112,9 +112,9 @@ bool TempVulkanSetupObject::loadGlobalLevelFunctions()
 
 bool TempVulkanSetupObject::getAvailableInstanceExtensions(std::vector<VkExtensionProperties>& outAvailableExtensions) const
 {
-    if (!s_vulkanRTLFound)
+    /*if (!s_vulkanRTLFound)
         return false;
-
+*/
     // Input should be an empty vector
     outAvailableExtensions.clear();
 
