@@ -1,5 +1,6 @@
-project(PAGE)
 cmake_minimum_required(VERSION 3.9.2)
+project(PAGE)
+message("Creating project PAGE")
 
 # Compilation flags
 if(MSVC)
@@ -9,11 +10,7 @@ else(MSVC)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++17")
 endif(MSVC)
 
-# Glfw stuff
-option(GLFW_BUILD_DOCS OFF)
-option(GLFW_BUILD_EXAMPLES OFF)
-option(GLFW_BUILD_TESTS OFF)
-add_subdirectory(ext/glfw)
+option(PAGE_GLFW_ENABLED "Should we include GLFW?" OFF)
 
 # DireWolf - TODO Move to submodule
 add_subdirectory(src/direwolf)
@@ -30,7 +27,17 @@ source_group("Examples" FILES ${PROJECT_EXAMPLES})
 # Choose the right startup project
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${PROJECT_NAME})
 
-add_executable(${PROJECT_NAME} ${PROJECT_DISPLAY} ${PROJECT_CORE} ${PROJECT_RENDERER} ${PROJECT_EXAMPLES})
+add_executable(${PROJECT_NAME} ${PROJECT_DISPLAY} ${PROJECT_CORE} ${PROJECT_EXAMPLES})
 
-include_directories(src/)
-target_link_libraries(${PROJECT_NAME} glfw direwolf)
+target_include_directories(${PROJECT_NAME} PUBLIC src/ direwolf/include/)
+
+target_link_libraries(${PROJECT_NAME} direwolf)
+
+# Glfw stuff
+if (PAGE_GLFW_ENABLED)
+  option(GLFW_BUILD_DOCS OFF)
+  option(GLFW_BUILD_EXAMPLES OFF)
+  option(GLFW_BUILD_TESTS OFF)
+  add_subdirectory(ext/glfw)
+  target_link_libraries(${PROJECT_NAME} glfw)
+endif(PAGE_GLFW_ENABLED)

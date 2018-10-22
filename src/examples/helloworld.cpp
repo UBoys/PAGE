@@ -15,5 +15,6 @@ int main() {
 	page::Engine engine(std::move(data));
 	engine.Run();
 
+    std::cout << "\n\nPress enter to EXIT";
 	std::cin.get();
 }

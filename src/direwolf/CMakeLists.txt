@@ -1,17 +1,66 @@
-project(DireWolf DESCRIPTION "Device Independent Rendering Engine with Other Lively Features")
 cmake_minimum_required(VERSION 3.9.2)
+message("Creating project DireWolf")
+project(DireWolf DESCRIPTION "Device Independent Rendering Engine with Other Lively Features")
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option(DIREWOLF_BUILD_EXAMPLES OFF)
+option(DIREWOLF_BUILD_EXAMPLES ON)
+option(DIREWOLF_VULKAN_ENABLED "Should we include vulkan features?" OFF)
+option(DIREWOLF_OPENGL_ENABLED "Should we include OpenGL features?" ON)
+
+set(lib_type STATIC)
+if (BUILD_SHARED_LIBS)
+  set(lib_type SHARED)
+endif()
+
+message("Creating DireWolf as a ${lib_type} library")
+
+# Add library and mandatory sourcefiles
+add_library(direwolf
+  ${lib_type}
+    src/renderengine.cpp
+    include/direwolf/renderengine.h
+    # TODO: this shouldn't be here
+    include/direwolf/vulkan/vulkansetup.h
+)
 
 if (DIREWOLF_BUILD_EXAMPLES)
-    add_subdirectory(examples)
+  add_subdirectory(examples)
 endif()
 
-if (BUILD_SHARED_LIBS)
-    add_library(direwolf SHARED src/renderengine.cpp src/opengl/renderer_ogl.cpp)
-else()
-    add_library(direwolf STATIC src/renderengine.cpp src/opengl/renderer_ogl.cpp)
-endif()
+if (DIREWOLF_OPENGL_ENABLED)
+  message("Including OpenGL")
 
-target_include_directories(direwolf PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  target_sources(direwolf PRIVATE src/opengl/renderer_ogl.cpp)
+endif (DIREWOLF_OPENGL_ENABLED)
+
+if (DIREWOLF_VULKAN_ENABLED)
+  message("Including Vulkan")
+
+  find_package(Vulkan REQUIRED)
+  if (Vulkan_FOUND)
+    message("Found Vulkan")
+  endif (Vulkan_FOUND)
+
+  target_include_directories(direwolf PRIVATE ${Vulkan_INCLUDE_DIR})
+
+  target_sources(direwolf
+    PRIVATE
+      # TODO: this should be here src/vulkan/vulkansetup.h
+      src/vulkan/listofvulkanfunctions.inl
+      src/vulkan/vulkanfunctions.cpp
+      src/vulkan/vulkanfunctions.h
+      src/vulkan/vulkansetup.cpp
+  )
+
+  target_compile_definitions(direwolf
+    PRIVATE
+      # DW_VULKAN_ENABLED=1
+      VK_NO_PROTOTYPES=1
+  )
+endif (DIREWOLF_VULKAN_ENABLED)
+
+target_include_directories(direwolf
+  PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
