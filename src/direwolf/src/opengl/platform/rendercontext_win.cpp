@@ -24,35 +24,21 @@ RenderContextWin::RenderContextWin(const PlatformData& platformData) {
                                   0, NULL, NULL, GetModuleHandle(NULL), 0);
 
 	DEBUG_LOG(Logger::INFO, "Setting up render context for windows");
-	DEBUG_LOG(Logger::INFO, "Setting up render context for windows2");
-	Logger::Stop();
 
     // Initialize extensions
     // Get the device context
     m_deviceContext = GetDC(hwndFake);
-    if (!m_deviceContext) {
-        std::cerr << "bajs";
-    }
     // Set a temporary pixel format
     errorCode = SetPixelFormat(m_deviceContext, 1, &m_pixelFormat);
-    if (errorCode != 1) {
-        std::cerr << "bjas";
-    }
     // Create temporary render context
     m_renderContext = wglCreateContext(m_deviceContext);
-    if (!m_renderContext) {
-        std::cerr << "fudge";
-    }
     // Set the temporary rendering context as the current rnedering context for this
     // window
     errorCode = wglMakeCurrent(m_deviceContext, m_renderContext);
-    if (errorCode != 1) {
-        std::cerr << "fuck";
-    }
     // Initialize the OpenGL extensions, we need a temp context to do so
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        std::cerr << "Failed to initialize extensions\n";
+		DEBUG_LOG(Logger::ERR, "Failed to initialize extensions");
     }
 
     // Release the temporary render context now that the extensions have loaded
@@ -65,9 +51,6 @@ RenderContextWin::RenderContextWin(const PlatformData& platformData) {
     // Get the device context again
     m_hwnd = static_cast<HWND>(platformData.windowHandle);
     m_deviceContext = GetDC(m_hwnd);
-    if (!m_deviceContext) {
-        std::cerr << "hejs";
-    }
 
     int32_t attrs[] = {WGL_SAMPLE_BUFFERS_ARB,
                        0,
@@ -94,16 +77,8 @@ RenderContextWin::RenderContextWin(const PlatformData& platformData) {
     // Query for a pixel format that fits the attributes we want
     errorCode = wglChoosePixelFormatARB(m_deviceContext, attrs, NULL, 1, pixelFormat1,
                                         &formatCount);
-    if (errorCode != 1) {
-        std::cerr << "fuck";
-    }
-
     // If the gpu/display can handle the desired pixel format we set it as the current one
     errorCode = SetPixelFormat(m_deviceContext, pixelFormat1[0], &m_pixelFormat);
-    if (errorCode != 1) {
-        std::cerr << "fuck";
-    }
-
     int attributeList[5];
     // Set the 4.0 version of OpenGL in the attribute list.
     attributeList[0] = WGL_CONTEXT_MAJOR_VERSION_ARB;
@@ -114,27 +89,21 @@ RenderContextWin::RenderContextWin(const PlatformData& platformData) {
     attributeList[4] = 0;
     m_renderContext = wglCreateContextAttribsARB(m_deviceContext, 0, attributeList);
     if (!m_renderContext) {
-        std::cerr << "fudge";
+        DEBUG_LOG(Logger::ERR, "Failed to initialize context");
     }
     errorCode = wglMakeCurrent(m_deviceContext, m_renderContext);
-    if (errorCode != 1) {
-        std::cerr << "fuck";
-    }
-
     // Get the name of the video card.
     const char* vendorString = (char*)glGetString(GL_VENDOR);
     const char* versionString = (char*)glGetString(GL_VERSION);
 
-    // Turn on or off the vertical sync depending on the input bool value.
-    if (true) {
+    if (/*vSync*/true) {
         wglSwapIntervalEXT(1);
     } else {
         wglSwapIntervalEXT(0);
     }
 
-    std::cout << "DireWolf: Successfully set up OpenGL context with GPU " << vendorString
-              << std::endl;
-    std::cout << "DireWolf: Running OpenGL version " << versionString << std::endl;
+	DEBUG_LOG(Logger::INFO, "DireWolf: Successfully set up OpenGL context with GPU " + std::string(vendorString));
+	DEBUG_LOG(Logger::INFO, "DireWolf: Running OpenGL version " + std::string(versionString));
 }
 
 }  // namespace dwf
