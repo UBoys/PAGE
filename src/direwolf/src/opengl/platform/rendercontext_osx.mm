@@ -36,7 +36,7 @@ RenderContextOSX::RenderContextOSX(const PlatformData& platformData) {
     }
 
     NSRect glViewRect = [[nsWindow contentView] bounds];
-	NSOpenGLView* glView = [[NSOpenGLView alloc] initWithFrame:glViewRect pixelFormat:pixelFormat];
+    NSOpenGLView* glView = [[NSOpenGLView alloc] initWithFrame:glViewRect pixelFormat:pixelFormat];
     if (!glView) {
          std::cerr << "fuck2";
     }
@@ -65,8 +65,8 @@ RenderContextOSX::RenderContextOSX(const PlatformData& platformData) {
         std::cerr << "Fuck no context\n";
     }
     [glContext makeCurrentContext];
-	GLint interval = 0;
-	[glContext setValues:&interval forParameter:NSOpenGLCPSwapInterval];
+    GLint interval = 0;
+    [glContext setValues:&interval forParameter:NSOpenGLCPSwapInterval];
 
     // When initializing NSOpenGLView programatically (as we are), this sometimes doesn't
     // get hooked up properly (especially when there are existing window elements). This ensures
@@ -79,7 +79,7 @@ RenderContextOSX::RenderContextOSX(const PlatformData& platformData) {
 
     // Get the name of the video card.
     auto vendorString = static_cast<const uint8_t*>(glGetString(GL_VENDOR));
-	auto versionString = static_cast<const uint8_t*>(glGetString(GL_VERSION));
+    auto versionString = static_cast<const uint8_t*>(glGetString(GL_VERSION));
 
     std::cout << "DireWolf: Successfully set up OpenGL context with GPU " << vendorString << std::endl;
     std::cout << "DireWolf: Running OpenGL version " << versionString << std::endl;
@@ -95,7 +95,7 @@ RenderContextOSX::~RenderContextOSX() {
 void RenderContextOSX::SwapBuffers() const {
     NSOpenGLContext* glContext = static_cast<NSOpenGLContext*>(m_context);
     [glContext makeCurrentContext];
-	[glContext flushBuffer];
+    [glContext flushBuffer];
 }
 
 }  // namespace dwf
