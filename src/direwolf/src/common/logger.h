@@ -10,7 +10,7 @@ class Logger {
 public:
     Logger() = delete;
     Logger(const Logger& logger) = delete;
-    Logger& operator = (const Logger& logger) = delete;
+    Logger& operator= (const Logger& logger) = delete;
 
     enum Severity {
         DEBUG,
@@ -21,7 +21,7 @@ public:
     };
 
 	static void Write(Severity severity, const std::string& message);
-	static void Destroy();
+	static void Flush();
 };
 
 }
