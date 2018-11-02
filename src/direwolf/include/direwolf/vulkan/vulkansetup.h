@@ -1,13 +1,13 @@
 #pragma once
 
+#include "vulkan/vulkanfunctions.h"
+
 #include <stdint.h>
 #include <vector>
 
 #if defined _WIN32
 #include <windows.h>
 #endif // _WIN32
-
-struct VkExtensionProperties;
 
 namespace page {
 namespace vulkan {
@@ -20,10 +20,14 @@ public:
     bool isValid() const { return m_isValid; }
     void debugPrintAvailableExtensions() const;
     static std::vector<const char*> getDefaultInstanceExtensions();
+    static void printPhysicalDeviceInfo(const VkPhysicalDevice& device);
+    static void printExtensionInfo(const VkExtensionProperties& extensionProperties);
 
 private: // variables
-    bool m_isValid;
     static inline bool s_vulkanRTLFound = false;
+
+    bool m_isValid;
+    VkInstance m_instance;
 
 #if defined _WIN32
     HMODULE vulkan_library;
@@ -38,7 +42,11 @@ private: // functions
     bool initProcAddr();
     bool isExtensionSupported(const char* extension, std::vector<VkExtensionProperties>* availableExtensions = nullptr) const;
     bool loadGlobalLevelFunctions();
-    bool createVulkanInstance(std::vector<const char*>* desiredExtensions);
+    bool loadInstanceLevelFunctions();
+    bool getPhysicalDevices(std::vector<VkPhysicalDevice>& outAvailableDevices);
+    bool getPhysicalDeviceExtensions(const VkPhysicalDevice& device, std::vector<VkExtensionProperties>& outAvailableExtensions);
+    bool loadInstanceLevelFunctionsFromExtensions(const std::vector<const char*>* enabledExtensions = nullptr);
+    bool createVulkanInstance(std::vector<const char*>* desiredExtensions = nullptr);
     bool getAvailableInstanceExtensions(std::vector<VkExtensionProperties>& outAvailableExtensions) const;
 };
 
