@@ -2,7 +2,8 @@
 
 #include <cstring>
 #include <iostream>
-#include "vulkan/vulkanfunctions.h"
+#include <iomanip> // TODO: move if/when print functions are moved
+#include <string>
 
 namespace page::vulkan {
 
@@ -11,6 +12,7 @@ namespace page::vulkan {
 // TODO: should probably take some init-struct
 TempVulkanSetupObject::TempVulkanSetupObject(std::vector<const char*>* desiredExtensions /* = nullptr */)
 : m_isValid(false)
+, m_instance(VK_NULL_HANDLE)
 {
     std::cout << "I am a temporary Vulkan Setup object\n";
     m_isValid = initialize(desiredExtensions);
@@ -25,13 +27,25 @@ bool TempVulkanSetupObject::initialize(std::vector<const char*>* desiredExtensio
         return false;
     }
 
-    // Out as soon as something goes wrong
-    if (!initLibs() ||
-        !initProcAddr() ||
-        !loadGlobalLevelFunctions() ||
-        !createVulkanInstance(desiredExtensions))
+    // TODO: this is just temp logic..
     {
-        return false;
+        std::vector<VkPhysicalDevice> physicalDevices;
+        // Out as soon as something goes wrong
+        if (!initLibs() ||
+            !initProcAddr() ||
+            !loadGlobalLevelFunctions() ||
+            !createVulkanInstance(desiredExtensions) ||
+            !loadInstanceLevelFunctions() ||
+            !loadInstanceLevelFunctionsFromExtensions() ||
+            !getPhysicalDevices(physicalDevices))
+        {
+            return false;
+        }
+
+        for (const VkPhysicalDevice& device : physicalDevices) {
+            std::vector<VkExtensionProperties> extensionProperties;
+            getPhysicalDeviceExtensions(device, extensionProperties);
+        }
     }
 
     return true;
@@ -97,7 +111,7 @@ bool TempVulkanSetupObject::loadGlobalLevelFunctions()
 {
 #define GLOBAL_LEVEL_VULKAN_FUNCTION( name )                        \
     name = (PFN_##name)vkGetInstanceProcAddr( nullptr, #name );     \
-    if( name == nullptr ) {                                         \
+    if ( name == nullptr ) {                                        \
         std::cout << "Could not load global-level function named: " \
             #name << std::endl;                                     \
         return false;                                               \
@@ -110,27 +124,67 @@ bool TempVulkanSetupObject::loadGlobalLevelFunctions()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+bool TempVulkanSetupObject::loadInstanceLevelFunctions()
+{
+#define INSTANCE_LEVEL_VULKAN_FUNCTION( name )                              \
+    name = (PFN_##name)vkGetInstanceProcAddr( m_instance, #name );          \
+    if ( name == nullptr ) {                                                \
+        std::cerr << "Could not load instance-level Vulkan function named: "\
+            #name << std::endl;                                             \
+        return false;                                                       \
+    }                                                                       \
+
+#include "ListOfVulkanFunctions.inl"
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::loadInstanceLevelFunctionsFromExtensions(const std::vector<const char*>* enabledExtensions /* = nullptr */)
+{
+#define INSTANCE_LEVEL_VULKAN_FUNCTION_FROM_EXTENSION( name, extension )                \
+    if (enabledExtensions) {                                                            \
+        for (const char* const & enabledExtension : *enabledExtensions) {               \
+            if (std::string(enabledExtension) == std::string(extension)) {              \
+                name = (PFN_##name)vkGetInstanceProcAddr(m_instance, #name);            \
+                if( name == nullptr ) {                                                 \
+                    std::cerr << "Could not load instance-level Vulkan function named: "\
+                        #name << std::endl;                                             \
+                    return false;                                                       \
+                }                                                                       \
+            }                                                                           \
+        }                                                                               \
+    }
+
+#include "ListOfVulkanFunctions.inl"
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// TODO: this needs refactoring
 bool TempVulkanSetupObject::getAvailableInstanceExtensions(std::vector<VkExtensionProperties>& outAvailableExtensions) const
 {
-    /*if (!s_vulkanRTLFound)
+    if (!s_vulkanRTLFound)
         return false;
-*/
+
     // Input should be an empty vector
     outAvailableExtensions.clear();
 
     VkResult result = VK_SUCCESS;
-    uint32_t extensionCount = 0;
+    uint32_t numExtensions = 0;
 
     // Get number of available extensions
-    result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+    result = vkEnumerateInstanceExtensionProperties(nullptr, &numExtensions, nullptr);
 
-    if (result != VK_SUCCESS || extensionCount == 0) {
+    if (result != VK_SUCCESS || numExtensions == 0) {
         std::cerr << "Could not get the number of Instance extensions." << std::endl;
         return false;
     }
 
-    outAvailableExtensions.resize(extensionCount);
-    result = vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, &outAvailableExtensions[0]);
+    outAvailableExtensions.resize(numExtensions);
+    result = vkEnumerateInstanceExtensionProperties(nullptr, &numExtensions, &outAvailableExtensions[0]);
 
     if (result != VK_SUCCESS || outAvailableExtensions.size() == 0) {
         std::cerr << "Could not enumerate Instance extensions." << std::endl;
@@ -149,10 +203,10 @@ void TempVulkanSetupObject::debugPrintAvailableExtensions() const
     if (!getAvailableInstanceExtensions(availableExtensions))
         return;
 
-    std::cout << "The following extensions are available:\n";
+    std::cout << "The following vulkan instance extensions are available:\n";
 
     for (const VkExtensionProperties& extension : availableExtensions) {
-        std::cout << "\t" << extension.extensionName << "\n";
+        printExtensionInfo(extension);
     }
     std::cout << std::endl;
 }
@@ -196,12 +250,9 @@ bool TempVulkanSetupObject::createVulkanInstance(std::vector<const char*>* desir
     instanceCreateInfo.enabledExtensionCount = desiredExtensions ? desiredExtensions->size() : 0;
     instanceCreateInfo.ppEnabledExtensionNames = desiredExtensions ? desiredExtensions->data() : nullptr;
 
-    // TODO: make member variable?
-    VkInstance instance;
-    if ( (vkCreateInstance( &instanceCreateInfo, nullptr, &instance ) != VK_SUCCESS) || (instance == VK_NULL_HANDLE) ) {
-        std::cout << "Could not create Vulkan Instance." << std::endl;
+    if ( (vkCreateInstance( &instanceCreateInfo, nullptr, &m_instance ) != VK_SUCCESS) || (m_instance == VK_NULL_HANDLE) ) {
+        std::cerr << "Could not create Vulkan Instance." << std::endl;
         return false;
-
     }
 
     return true;
@@ -244,5 +295,81 @@ bool TempVulkanSetupObject::isExtensionSupported(const char* extension, std::vec
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::getPhysicalDevices(std::vector<VkPhysicalDevice>& outAvailableDevices)
+{
+    uint32_t numDevices = 0;
+    if (vkEnumeratePhysicalDevices(m_instance, &numDevices, nullptr) != VK_SUCCESS || numDevices == 0) {
+        std::cerr << "Could not get the number of available physical devices." << std::endl;
+        return false;
+    }
+
+    outAvailableDevices.resize(numDevices);
+    if (vkEnumeratePhysicalDevices(m_instance, &numDevices, outAvailableDevices.data()) != VK_SUCCESS) {
+        std::cerr << "Could not enumerate physical devices." << std::endl;
+        return false;
+    }
+
+    // TODO: remove this
+    std::cout << "\nFound " << numDevices << " physical devices:\n";
+    for (const VkPhysicalDevice& dev : outAvailableDevices) {
+        printPhysicalDeviceInfo(dev);
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool TempVulkanSetupObject::getPhysicalDeviceExtensions(const VkPhysicalDevice& device, std::vector<VkExtensionProperties>& outAvailableExtensions)
+{
+    uint32_t numExtensions = 0;
+    if (vkEnumerateDeviceExtensionProperties(device, nullptr, &numExtensions, nullptr) != VK_SUCCESS || numExtensions == 0) {
+        std::cerr << "Could not get the number of physical device extensions." << std::endl;
+        return false;
+    }
+
+    outAvailableExtensions.resize(numExtensions);
+    if (vkEnumerateDeviceExtensionProperties(device, nullptr, &numExtensions, outAvailableExtensions.data()) != VK_SUCCESS || numExtensions == 0) {
+        std::cerr << "Could not enumerate physical device extensions." << std::endl;
+        return false;
+    }
+
+    // TODO: REMOVE THIS
+    std::cout << "\nThere are " << numExtensions << " extension properties for ";
+    printPhysicalDeviceInfo(device);
+    for (const VkExtensionProperties& prop : outAvailableExtensions) {
+        printExtensionInfo(prop);
+    }
+
+    return true;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// TODO: move elsewhere.. maybe a vulkanutils file?
+void TempVulkanSetupObject::printPhysicalDeviceInfo(const VkPhysicalDevice& device)
+{
+    VkPhysicalDeviceProperties props;
+    vkGetPhysicalDeviceProperties(device, &props);
+    char* typeName;
+    switch (props.deviceType) {
+    case VK_PHYSICAL_DEVICE_TYPE_OTHER: typeName = "OTHER"; break;
+    case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU: typeName = "INTEGRATED GPU"; break;
+    case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU: typeName = "DISCRETE GPU"; break;
+    case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU: typeName = "VIRTUAL GPU"; break;
+    case VK_PHYSICAL_DEVICE_TYPE_CPU: typeName = "CPU"; break;
+    default: typeName = "UNRECOGNISED"; break;
+    }
+    std::cout << "\t" << std::left << std::setw(30) << props.deviceName << "\t[ " << typeName << " ]" << std::endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// TODO: move elsewhere.. maybe a vulkanutils file?
+void TempVulkanSetupObject::printExtensionInfo(const VkExtensionProperties& extensionProperties)
+{
+    std::cout << "\t" << std::left << std::setw(40) << extensionProperties.extensionName << "\t[ " << extensionProperties.specVersion << " ]" << std::endl;
+}
 
 } // namespace page::vulkan

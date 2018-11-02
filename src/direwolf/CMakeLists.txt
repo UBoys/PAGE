@@ -19,7 +19,7 @@ add_library(direwolf
   ${lib_type}
     src/renderengine.cpp
     include/direwolf/renderengine.h
-    # TODO: this shouldn't be here
+    # TODO: this shouldn't be here.. remove when vulkan stuff is included in the direwolf wrappers
     include/direwolf/vulkan/vulkansetup.h
 )
 
@@ -41,11 +41,14 @@ if (DIREWOLF_VULKAN_ENABLED)
     message("Found Vulkan")
   endif (Vulkan_FOUND)
 
-  target_include_directories(direwolf PRIVATE ${Vulkan_INCLUDE_DIR})
+  target_include_directories(direwolf
+    #TODO this should be PRIVATE.. change when vulkan stuff is included in the direwolf wrappers
+    PUBLIC
+      ${Vulkan_INCLUDE_DIR})
 
   target_sources(direwolf
     PRIVATE
-      # TODO: this should be here src/vulkan/vulkansetup.h
+      # TODO: this should be here src/vulkan/vulkansetup.h.. add when vulkan stuff is included in the direwolf wrappers
       src/vulkan/listofvulkanfunctions.inl
       src/vulkan/vulkanfunctions.cpp
       src/vulkan/vulkanfunctions.h
