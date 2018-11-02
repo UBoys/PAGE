@@ -20,8 +20,6 @@ public:
     bool isValid() const { return m_isValid; }
     void debugPrintAvailableExtensions() const;
     static std::vector<const char*> getDefaultInstanceExtensions();
-    static void printPhysicalDeviceInfo(const VkPhysicalDevice& device);
-    static void printExtensionInfo(const VkExtensionProperties& extensionProperties);
 
 private: // variables
     static inline bool s_vulkanRTLFound = false;

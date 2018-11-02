@@ -53,6 +53,9 @@ if (DIREWOLF_VULKAN_ENABLED)
       src/vulkan/vulkanfunctions.cpp
       src/vulkan/vulkanfunctions.h
       src/vulkan/vulkansetup.cpp
+      src/vulkan/vulkanutils.h
+      src/vulkan/vulkanutils.inl
+      src/vulkan/vulkanutils.cpp
   )
 
   target_compile_definitions(direwolf
