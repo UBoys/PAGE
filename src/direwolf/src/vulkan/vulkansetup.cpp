@@ -1,9 +1,9 @@
 #include "direwolf/vulkan/vulkansetup.h"
+
 #include "vulkanutils.h"
 
 #include <cstring>
 #include <iostream>
-#include <iomanip> // TODO: move if/when print functions are moved
 #include <string>
 
 namespace page::vulkan {
@@ -13,9 +13,12 @@ namespace page::vulkan {
 // TODO: should probably take some init-struct
 TempVulkanSetupObject::TempVulkanSetupObject(std::vector<const char*>* desiredExtensions /* = nullptr */)
 : m_isValid(false)
+, m_vulkanRTLFound(false)
 , m_instance(VK_NULL_HANDLE)
 {
-    std::cout << "I am a temporary Vulkan Setup object\n";
+#if defined( DW_VERBOSE_LOG_VK )
+    std::cout << "\nTemporaryVulkanSetupObject ctor\n";
+#endif
     m_isValid = initialize(desiredExtensions);
 }
 
@@ -61,9 +64,9 @@ bool TempVulkanSetupObject::initialize(std::vector<const char*>* desiredExtensio
 
 bool TempVulkanSetupObject::initLibs()
 {
-#if defined _WIN32
+#if defined( _WIN32 )
     vulkan_library = LoadLibrary("vulkan-1.dll");
-#elif defined __linux
+#elif defined( __linux )
     vulkan_library = dlopen("libvulkan.so.1", RTLD_NOW);
 #else
     std::cerr << "The PAGE renderer is not yet setup for Vulkan on this platform. Supported operating systems are Linux and Windows" << std::endl;
@@ -71,12 +74,15 @@ bool TempVulkanSetupObject::initLibs()
 #endif
     if (!vulkan_library) {
         std::cerr << "Could not connect with a Vulkan Runtime library.\n";
-        s_vulkanRTLFound = false;
+        m_vulkanRTLFound = false;
         return false;
     }
 
+#if defined ( DW_VERBOSE_LOG_VK )
     std::cout << "\tSuccessfully connected with a Vulkan Runtime library.\n";
-    s_vulkanRTLFound = true;
+#endif
+
+    m_vulkanRTLFound = true;
     return true;
 }
 
@@ -85,14 +91,15 @@ bool TempVulkanSetupObject::initLibs()
 bool TempVulkanSetupObject::initProcAddr()
 {
     // TODO: move this #ifdef part elsewhere?
-#ifdef VK_NO_PROTOTYPES
+#if defined( DW_VERBOSE_LOG_VK )
+#if defined( VK_NO_PROTOTYPES )
     std::cout << "\tVK_NO_PROTOTYPES is defined\n";
-#else
+#else // VK_NO_PROTOTYPES
     std::cout << "\tWARNING: VK_NO_PROTOTYPES is NOT defined. This may become a potential performance issue.\n";
-#endif
+#endif // VK_NO_PROTOTYPES
+#endif // DW_VERBOSE_LOG_VK
 
-
-#if defined _WIN32
+#if defined( _WIN32 )
 #define LoadFunction GetProcAddress
 #elif defined __linux
 #define LoadFunction dlsym
@@ -100,8 +107,8 @@ bool TempVulkanSetupObject::initProcAddr()
 
 #define EXPORTED_VULKAN_FUNCTION( name )                              \
     name = (PFN_##name)LoadFunction( vulkan_library, #name );         \
-    if( name == nullptr ) {                                           \
-        std::cout << "Could not load exported Vulkan function named: "\
+    if ( name == nullptr ) {                                          \
+        std::cerr << "Could not load exported Vulkan function named: "\
             #name << std::endl;                                       \
         return false;                                                 \
     }
@@ -172,8 +179,9 @@ bool TempVulkanSetupObject::loadInstanceLevelFunctionsFromExtensions(const std::
 // TODO: this needs refactoring
 bool TempVulkanSetupObject::getAvailableInstanceExtensions(std::vector<VkExtensionProperties>& outAvailableExtensions) const
 {
-    if (!s_vulkanRTLFound)
+    if (!m_vulkanRTLFound) {
         return false;
+    }
 
     // Input should be an empty vector
     outAvailableExtensions.clear();
@@ -192,24 +200,16 @@ bool TempVulkanSetupObject::getAvailableInstanceExtensions(std::vector<VkExtensi
         return false;
     }
 
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void TempVulkanSetupObject::debugPrintAvailableExtensions() const
-{
-    std::vector<VkExtensionProperties> availableExtensions;
-
-    if (!getAvailableInstanceExtensions(availableExtensions))
-        return;
-
-    std::cout << "The following vulkan instance extensions are available:\n";
-
-    for (const VkExtensionProperties& extensionProperty : availableExtensions) {
-       prettyPrint(std::cout, extensionProperty, 40, "\t", "\n");
+#if defined( DW_VERBOSE_LOG_VK )
+    std::cout << "\nThe following vulkan instance extensions are available:\n";
+    std::cout << std::left << std::setfill(' ');
+    for (const VkExtensionProperties& extensionProperty : outAvailableExtensions) {
+        prettyPrint(std::cout, extensionProperty, 40, "\t", "\n");
     }
     std::cout << std::endl;
+#endif
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -289,7 +289,9 @@ bool TempVulkanSetupObject::isExtensionSupported(const char* extension, std::vec
 
     for (VkExtensionProperties availableExtension : *availableExtensionsPtr) {
         if (strcmp(availableExtension.extensionName, extension) == 0)
+        {
             return true;
+        }
     }
 
     return false;
@@ -311,11 +313,13 @@ bool TempVulkanSetupObject::getPhysicalDevices(std::vector<VkPhysicalDevice>& ou
         return false;
     }
 
-    // TODO: remove this
-    std::cout << "\nFound " << numDevices << " physical devices:\n";
+#if defined( DW_VERBOSE_LOG_VK )
+    std::cout << "\nFound " << numDevices << " physical device(s):\n";
+    std::cout << std::left << std::setfill(' ');
     for (const VkPhysicalDevice& device : outAvailableDevices) {
         prettyPrint(std::cout, device, 30, "\t", "\n");
     }
+#endif
 
     return true;
 }
@@ -336,12 +340,13 @@ bool TempVulkanSetupObject::getPhysicalDeviceExtensions(const VkPhysicalDevice& 
         return false;
     }
 
-    // TODO: REMOVE THIS
+#if defined( DW_VERBOSE_LOG_VK )
+    std::cout << std::left << std::setfill(' ');
     std::cout << "\nThere are " << numExtensions << " extension properties for \"" << device << "\"\n";
-
     for (const VkExtensionProperties& extensionProperties : outAvailableExtensions) {
         prettyPrint(std::cout, extensionProperties, 40, "\t", "\n");
     }
+#endif
 
     return true;
 }

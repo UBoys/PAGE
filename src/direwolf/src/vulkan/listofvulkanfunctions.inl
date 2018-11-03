@@ -53,6 +53,7 @@ INSTANCE_LEVEL_VULKAN_FUNCTION_FROM_EXTENSION(vkGetPhysicalDeviceSurfaceFormatsK
 #endif
 
 #undef INSTANCE_LEVEL_VULKAN_FUNCTION_FROM_EXTENSION
+
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef DEVICE_LEVEL_VULKAN_FUNCTION

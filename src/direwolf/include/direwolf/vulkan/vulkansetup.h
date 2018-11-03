@@ -18,13 +18,11 @@ public:
     TempVulkanSetupObject(std::vector<const char*>* desiredExtensions = nullptr);
     bool initialize(std::vector<const char*>* desiredExtensions);
     bool isValid() const { return m_isValid; }
-    void debugPrintAvailableExtensions() const;
     static std::vector<const char*> getDefaultInstanceExtensions();
 
 private: // variables
-    static inline bool s_vulkanRTLFound = false;
-
     bool m_isValid;
+    bool m_vulkanRTLFound;
     VkInstance m_instance;
 
 #if defined _WIN32

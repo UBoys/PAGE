@@ -3,7 +3,8 @@ message("Creating project DireWolf")
 project(DireWolf DESCRIPTION "Device Independent Rendering Engine with Other Lively Features")
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option(DIREWOLF_BUILD_EXAMPLES ON)
+option(DIREWOLF_BUILD_EXAMPLES "Should the examples folder be added?" ON)
+option(DIREWOLF_USE_VERBOSE_VULKAN_LOG "Should the Direwolf Vulkan module print verbose info messages?" ON)
 option(DIREWOLF_VULKAN_ENABLED "Should we include vulkan features?" OFF)
 option(DIREWOLF_OPENGL_ENABLED "Should we include OpenGL features?" ON)
 
@@ -63,6 +64,14 @@ if (DIREWOLF_VULKAN_ENABLED)
       # DW_VULKAN_ENABLED=1
       VK_NO_PROTOTYPES=1
   )
+
+  if (DIREWOLF_USE_VERBOSE_VULKAN_LOG)
+      target_compile_definitions(direwolf
+        PRIVATE
+          DW_VERBOSE_LOG_VK = 1
+      )
+  endif(DIREWOLF_USE_VERBOSE_VULKAN_LOG)
+
 endif (DIREWOLF_VULKAN_ENABLED)
 
 target_include_directories(direwolf
