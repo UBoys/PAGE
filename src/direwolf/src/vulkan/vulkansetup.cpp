@@ -1,4 +1,5 @@
 #include "direwolf/vulkan/vulkansetup.h"
+
 #include "vulkanutils.h"
 
 #include <cstring>
@@ -79,6 +80,7 @@ bool TempVulkanSetupObject::initLibs()
 #ifdef DW_VERBOSE_LOG_VK
     std::cout << "\tSuccessfully connected with a Vulkan Runtime library.\n";
 #endif
+
     s_vulkanRTLFound = true;
     return true;
 }
@@ -95,7 +97,6 @@ bool TempVulkanSetupObject::initProcAddr()
     std::cout << "\tWARNING: VK_NO_PROTOTYPES is NOT defined. This may become a potential performance issue.\n";
 #endif // VK_NO_PROTOTYPES
 #endif // DW_VERBOSE_LOG_VK
-
 
 #if defined _WIN32
 #define LoadFunction GetProcAddress

@@ -74,7 +74,6 @@ if (DIREWOLF_VULKAN_ENABLED)
 
 endif (DIREWOLF_VULKAN_ENABLED)
 
-
 target_include_directories(direwolf
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
