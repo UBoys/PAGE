@@ -18,7 +18,6 @@ public:
     TempVulkanSetupObject(std::vector<const char*>* desiredExtensions = nullptr);
     bool initialize(std::vector<const char*>* desiredExtensions);
     bool isValid() const { return m_isValid; }
-    void debugPrintAvailableExtensions() const;
     static std::vector<const char*> getDefaultInstanceExtensions();
 
 private: // variables

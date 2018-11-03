@@ -15,7 +15,6 @@ void testNonEngineIntergratedVulkan()
 
     if (vulkanInitObj.isValid()) {
         std::cout << "\nVulkan was successfully initialized\n\n";
-        vulkanInitObj.debugPrintAvailableExtensions();
     } else {
         std::cout << "ERROR: Vulkan initialization failed\n";
     }

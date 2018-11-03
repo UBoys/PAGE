@@ -8,6 +8,7 @@
 namespace page::vulkan {
 
 // TODO: prettyPrint should be moved to some other util, perhaps logUtils (remember the .inl file)
+
 template <typename T>
 void prettyPrint(std::ostream& os, const T& t, uint8_t minWidth = 0, const char* prefix = "", const char* suffix = "");
 

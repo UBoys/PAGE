@@ -1,13 +1,13 @@
 #include "vulkanutils.h"
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 
 // TODO: fix namespaces
 namespace page::vulkan {
 
-// TODO: PRETTY PRINT SHOULDNT BE HERE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // PRETTY PRINT
 template <typename T>

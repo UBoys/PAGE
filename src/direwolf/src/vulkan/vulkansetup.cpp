@@ -3,7 +3,6 @@
 
 #include <cstring>
 #include <iostream>
-#include <iomanip> // TODO: move if/when print functions are moved
 #include <string>
 
 namespace page::vulkan {
@@ -15,7 +14,9 @@ TempVulkanSetupObject::TempVulkanSetupObject(std::vector<const char*>* desiredEx
 : m_isValid(false)
 , m_instance(VK_NULL_HANDLE)
 {
-    std::cout << "I am a temporary Vulkan Setup object\n";
+#ifdef DW_VERBOSE_LOG_VK
+    std::cout << "TemporaryVulkanSetupObject ctor\n";
+#endif
     m_isValid = initialize(desiredExtensions);
 }
 
@@ -75,7 +76,9 @@ bool TempVulkanSetupObject::initLibs()
         return false;
     }
 
+#ifdef DW_VERBOSE_LOG_VK
     std::cout << "\tSuccessfully connected with a Vulkan Runtime library.\n";
+#endif
     s_vulkanRTLFound = true;
     return true;
 }
@@ -85,11 +88,13 @@ bool TempVulkanSetupObject::initLibs()
 bool TempVulkanSetupObject::initProcAddr()
 {
     // TODO: move this #ifdef part elsewhere?
+#ifdef DW_VERBOSE_LOG_VK
 #ifdef VK_NO_PROTOTYPES
     std::cout << "\tVK_NO_PROTOTYPES is defined\n";
-#else
+#else // VK_NO_PROTOTYPES
     std::cout << "\tWARNING: VK_NO_PROTOTYPES is NOT defined. This may become a potential performance issue.\n";
-#endif
+#endif // VK_NO_PROTOTYPES
+#endif // DW_VERBOSE_LOG_VK
 
 
 #if defined _WIN32
@@ -101,7 +106,7 @@ bool TempVulkanSetupObject::initProcAddr()
 #define EXPORTED_VULKAN_FUNCTION( name )                              \
     name = (PFN_##name)LoadFunction( vulkan_library, #name );         \
     if( name == nullptr ) {                                           \
-        std::cout << "Could not load exported Vulkan function named: "\
+        std::cerr << "Could not load exported Vulkan function named: "\
             #name << std::endl;                                       \
         return false;                                                 \
     }
@@ -192,24 +197,16 @@ bool TempVulkanSetupObject::getAvailableInstanceExtensions(std::vector<VkExtensi
         return false;
     }
 
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void TempVulkanSetupObject::debugPrintAvailableExtensions() const
-{
-    std::vector<VkExtensionProperties> availableExtensions;
-
-    if (!getAvailableInstanceExtensions(availableExtensions))
-        return;
-
+#ifdef DW_VERBOSE_LOG_VK
     std::cout << "The following vulkan instance extensions are available:\n";
-
-    for (const VkExtensionProperties& extensionProperty : availableExtensions) {
-       prettyPrint(std::cout, extensionProperty, 40, "\t", "\n");
+    std::cout << std::left << std::setfill(' ');
+    for (const VkExtensionProperties& extensionProperty : outAvailableExtensions) {
+        prettyPrint(std::cout, extensionProperty, 40, "\t", "\n");
     }
     std::cout << std::endl;
+#endif
+
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -311,11 +308,13 @@ bool TempVulkanSetupObject::getPhysicalDevices(std::vector<VkPhysicalDevice>& ou
         return false;
     }
 
-    // TODO: remove this
-    std::cout << "\nFound " << numDevices << " physical devices:\n";
+#ifdef DW_VERBOSE_LOG_VK
+    std::cout << "\nFound " << numDevices << " physical device(s):\n";
+    std::cout << std::left << std::setfill(' ');
     for (const VkPhysicalDevice& device : outAvailableDevices) {
         prettyPrint(std::cout, device, 30, "\t", "\n");
     }
+#endif
 
     return true;
 }
@@ -336,12 +335,13 @@ bool TempVulkanSetupObject::getPhysicalDeviceExtensions(const VkPhysicalDevice& 
         return false;
     }
 
-    // TODO: REMOVE THIS
+#ifdef DW_VERBOSE_LOG_VK
+    std::cout << std::left << std::setfill(' ');
     std::cout << "\nThere are " << numExtensions << " extension properties for \"" << device << "\"\n";
-
     for (const VkExtensionProperties& extensionProperties : outAvailableExtensions) {
         prettyPrint(std::cout, extensionProperties, 40, "\t", "\n");
     }
+#endif
 
     return true;
 }
